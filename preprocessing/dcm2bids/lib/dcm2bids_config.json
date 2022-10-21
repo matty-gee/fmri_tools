@@ -1,0 +1,193 @@
+{
+    "descriptions": [
+      {
+      "dataType": "anat",
+      "modalityLabel": "T1w",
+      "criteria": {
+          "SeriesDescription": "T1w_MPR_BIC_v1"
+          }
+      },
+      {
+      "dataType": "func",
+      "modalityLabel": "sbref",
+      "customLabels": "task-rest_echo-01",
+      "criteria": {
+          "SeriesDescription": "BOLD_PA_MB2_ME3_rest_SBRef",
+          "ImageComments": "Single-band_reference",
+          "EchoTime": 0.0108
+          }
+      },
+      {
+      "dataType": "func",
+      "modalityLabel": "sbref",
+      "customLabels": "task-rest_echo-02",
+      "criteria": {
+          "SeriesDescription": "BOLD_PA_MB2_ME3_rest_SBRef",
+          "ImageComments": "Single-band_reference",
+          "EchoTime": 0.02868
+          }
+      },
+      {
+      "dataType": "func",
+      "modalityLabel": "sbref",
+      "customLabels": "task-rest_echo-03",
+      "criteria": {
+          "SeriesDescription": "BOLD_PA_MB2_ME3_rest_SBRef",
+          "ImageComments": "Single-band_reference",
+          "EchoTime": 0.04656
+          }
+      },
+        {
+        "dataType": "func",
+        "modalityLabel": "bold",
+        "customLabels": "task-rest_echo-01",
+        "criteria": {
+            "SeriesDescription": "BOLD_PA_MB2_ME3_rest",
+            "ImageComments": "Unaliased_MB2_PE4",
+            "EchoTime": 0.0108
+            }
+        },
+        {
+        "dataType": "func",
+        "modalityLabel": "bold",
+        "customLabels": "task-rest_echo-02",
+        "criteria": {
+            "SeriesDescription": "BOLD_PA_MB2_ME3_rest",
+            "ImageComments": "Unaliased_MB2_PE4",
+            "EchoTime": 0.02868
+            }
+        },
+        {
+        "dataType": "func",
+        "modalityLabel": "bold",
+        "customLabels": "task-rest_echo-03",
+        "criteria": {
+            "SeriesDescription": "BOLD_PA_MB2_ME3_rest",
+            "ImageComments": "Unaliased_MB2_PE4",
+            "EchoTime": 0.04656
+            }
+        },
+        {
+        "dataType": "func",
+        "modalityLabel": "sbref",
+        "customLabels": "task-whyhow_echo-01",
+        "criteria": {
+            "SeriesDescription": "BOLD_PA_MB2_ME3_whyHow_SBRef",
+            "ImageComments": "Single-band_reference",
+            "EchoTime": 0.0108
+            }
+        },
+        {
+        "dataType": "func",
+        "modalityLabel": "sbref",
+        "customLabels": "task-whyhow_echo-02",
+        "criteria": {
+            "SeriesDescription": "BOLD_PA_MB2_ME3_whyHow_SBRef",
+            "ImageComments": "Single-band_reference",
+            "EchoTime": 0.02868
+            }
+        },
+        {
+        "dataType": "func",
+        "modalityLabel": "sbref",
+        "customLabels": "task-whyhow_echo-03",
+        "criteria": {
+            "SeriesDescription": "BOLD_PA_MB2_ME3_whyHow_SBRef",
+            "ImageComments": "Single-band_reference",
+            "EchoTime": 0.04656
+            }
+        },
+        {
+        "dataType": "func",
+        "modalityLabel": "bold",
+        "customLabels": "task-whyhow_echo-01",
+        "criteria": {
+            "SeriesDescription": "BOLD_PA_MB2_ME3_whyHow",
+            "ImageComments": "Unaliased_MB2_PE4",
+            "EchoTime": 0.0108
+            }
+        },
+        {
+        "dataType": "func",
+        "modalityLabel": "bold",
+        "customLabels": "task-whyhow_echo-02",
+        "criteria": {
+            "SeriesDescription": "BOLD_PA_MB2_ME3_whyHow",
+            "ImageComments": "Unaliased_MB2_PE4",
+            "EchoTime": 0.02868
+            }
+        },
+        {
+        "dataType": "func",
+        "modalityLabel": "bold",
+        "customLabels": "task-whyhow_echo-03",
+        "criteria": {
+            "SeriesDescription": "BOLD_PA_MB2_ME3_whyHow",
+            "ImageComments": "Unaliased_MB2_PE4",
+            "EchoTime": 0.04656
+            }
+        },
+        {
+        "dataType": "fmap",
+        "modalityLabel": "epi",
+        "customLabels": "dir-AP",
+        "criteria": {
+            "SeriesDescription": "FieldMap_SE_EPI_AP_BIC_v1",
+            "PhaseEncodingDirection": "j-"
+            }
+        },
+        {
+        "dataType": "fmap",
+        "modalityLabel": "epi",
+        "customLabels": "dir-PA",
+        "criteria": {
+            "SeriesDescription": "FieldMap_SE_EPI_PA_BIC_v1",
+            "PhaseEncodingDirection": "j"
+            }
+        },
+        {
+        "dataType": "func",
+        "modalityLabel": "sbref",
+        "customLabels": "task-socialnav",
+        "criteria": {
+            "SeriesDescription": "BOLD_AP_MB_SocialNavigation_BIC_v1_SBRef"
+            }
+        },
+        {
+        "dataType": "func",
+        "modalityLabel": "bold",
+        "customLabels": "task-socialnav",
+        "criteria": {
+            "SeriesDescription": "BOLD_AP_MB_SocialNavigation_BIC_v1"
+            }
+        },
+        {"dataType": "dwi",
+        "modalityLabel": "dwi",
+        "customLabels": "dir-LR",
+        "criteria": {
+            "SeriesDescription": "DWI_LR_BIC_v1"
+            }
+        },
+        {"dataType": "dwi",
+        "modalityLabel": "sbref",
+        "customLabels": "dir-LR",
+        "criteria": {
+            "SeriesDescription": "DWI_LR_BIC_v1_SBRef"
+            }
+        },
+        {"dataType": "dwi",
+        "modalityLabel": "dwi",
+        "customLabels": "dir-RL",
+        "criteria": {
+            "SeriesDescription": "DWI_RL_BIC_v1"
+            }
+        },
+        {"dataType": "dwi",
+        "modalityLabel": "sbref",
+        "customLabels": "dir-RL",
+        "criteria": {
+            "SeriesDescription": "DWI_RL_BIC_v1_SBRef"
+            }
+        }
+    ]
+}

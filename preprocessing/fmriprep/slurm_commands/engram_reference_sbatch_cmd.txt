@@ -1,0 +1,4 @@
+sbatch --array=1-$(( $( wc -l /mnt/synapse/projects/SocialSpace/Data/Scans/RT/fmriprep_/code/participants.tsv | cut -f1 -d' ' ) - 1 )) /mnt/synapse/projects/SocialSpace/Data/Scans/RT/fmriprep_/code/engram_sbatch.slurm
+
+# submit with # of subjects
+sbatch --array=1-19 /mnt/synapse/projects/SocialSpace/Data/Scans/RT/fmriprep_/code/engram_sbatch.slurm

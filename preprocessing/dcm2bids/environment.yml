@@ -1,0 +1,17 @@
+name: dcm2bids
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.7
+  - dcm2niix
+  - dcm2bids
+  - xnat
+  - pip:
+    - bids
+
+# to activate: $ conda activate dcm2bids
+# to update (w/o having to activate first): $ conda env update --name dcm2bids --file environment.yml --prune
+# -- https://stackoverflow.com/questions/42352841/how-to-update-an-existing-conda-environment-with-a-yml-file
+# to deactivate: $ conda deactivate
+
+# if get ResolvePackageNotFound error, read this: https://stackoverflow.com/questions/49154899/resolvepackagenotfound-create-env-using-conda-and-yml-file-on-macos
