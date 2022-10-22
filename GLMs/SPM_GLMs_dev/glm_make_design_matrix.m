@@ -1,4 +1,4 @@
-function glm_design_matrix(func_imgs, glm_model, nuisance_txt, glm_dir)
+function glm_make_design_matrix(func_imgs, glm_model, nuisance_txt, glm_dir)
 
     spm('defaults', 'FMRI')
 

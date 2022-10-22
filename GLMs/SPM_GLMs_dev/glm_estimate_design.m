@@ -1,4 +1,4 @@
-function glm_estimate(spm_mat, write_residuals)
+function glm_estimate_design(spm_mat, write_residuals)
 
     spm('defaults', 'FMRI')
 
