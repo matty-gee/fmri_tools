@@ -14,14 +14,13 @@ model5 = {'character', 'decision', {'pov3d_angle','cos'}}; % 5 conds ('character
 model6 = {'affil', 'decision', {'affil_mean','z'; 'power_mean','z'};... % 2 conds w/ own pmods
           'power', 'decision', {'power_mean','z'}};
 
-% weired models to test edges
+% weird models to test edges
+% - should throw an error
 model7 = {'all', 'decision', {'affil_mean','z'; 'power_mean','z'};... 
           'power', 'decision', {'power_mean','z'}};
       
-
-      
-models = [{model1}; {model2}; {model3}; {model4}; {model5}; {model6}; {model7}; {'lsa'}; {'character'};...
+models = [{model1}; {model2}; {model3}; {model4}; {model5}; {model6}; {'lsa'}; {'character'};...
           {'angle'}; {'distance'}; {'dimensions'};];
 for n_model = 1:length(models)
-    glm_specify_design(func_dir, models{n_model}, 0, 0, 1)
+    glm_specify_design(func_dir, models{n_model}, sprintf('testing_%02d', n_model), 1)
 end

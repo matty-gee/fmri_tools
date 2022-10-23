@@ -1,4 +1,4 @@
-function cfd_json = cfd_json_read(cfd_json_fname)
+function cfd_json = fmriprep_cfd_json_read(cfd_json_fname)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Opens fmriprep confound json and makes readable in matlab

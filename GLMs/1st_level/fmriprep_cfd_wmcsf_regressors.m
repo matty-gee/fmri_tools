@@ -1,4 +1,4 @@
-function compute_wmcsf_regressors(sub_dir, preprocessing)
+function fmriprep_compute_wmcsf_regressors(sub_dir, preprocessing)
     % OLD: dont use....
     % change this to accept arg for which func image to get wm & csf from
         

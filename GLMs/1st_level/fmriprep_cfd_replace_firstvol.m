@@ -1,4 +1,4 @@
-function cfd_num = cfd_replace_firstvol(cfd, method)
+function cfd_num = fmriprep_cfd_replace_firstvol(cfd, method)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Replace the first volume in fmriprep confound by some method
     %
