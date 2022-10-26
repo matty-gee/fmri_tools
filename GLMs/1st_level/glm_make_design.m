@@ -1,6 +1,5 @@
 function glm = glm_make_design(model, timing, behavior, glm_dir, verbose)
 
-    % pass in the timing, behavioral files
     
     %------------------------------------------------------------------------------s
     % helper functions/structures
@@ -107,29 +106,22 @@ function glm = glm_make_design(model, timing, behavior, glm_dir, verbose)
         % assign durations [& optional parametric modulators] to events
         %------------------------------------------------------------------------------
 
+        
         trials_incl = glm.cond(n_cond).trials;
 
         % duration
         glm.cond(n_cond).duration = event_durations.(bold_event)(trials_incl); 
-
-        % pmods
-        regrs = [regrs, glm.cond(n_cond).name]; 
+        regrs = [regrs, glm.cond(n_cond).name];
+        
+        % pmods [optional]
+        glm.cond(n_cond).orth = 0; % turn off orthogonalization
         [n_cond_pmods, ~] = size(cond_pmods);
-        for n_pmod = 1:n_cond_pmods % optional
+        for n_pmod = 1:n_cond_pmods
 
             [pmod_name, normlz] = cond_pmods{n_pmod, :};
             regrs = [regrs, [glm.cond(n_cond).name '*' pmod_name]];
             param = behavior(trials_incl, pmod_name).Variables; 
-
-            % multiple pmods: turn off orthogonalization, demean
-            if length(cond_pmods) > 1
-                glm.cond(n_cond).orth = 0;
-                if contains(pmod_name, 'angle'), param = param - circ_mean(param); 
-                else,                            param = param - mean(param); 
-                end
-            end
-
-            param = normalize.(normlz)(param); % normalize: after demeaning b/c cosine isnt true "normalization"
+            param = normalize.(normlz)(param);
             glm.cond(n_cond).pmod(n_pmod) = struct('name', pmod_name, 'param', param,...
                                                    'poly', 1, 'normalized', normlz);
 

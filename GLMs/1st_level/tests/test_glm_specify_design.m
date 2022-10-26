@@ -2,7 +2,7 @@
 % on other side
 
 
-func_dir = '/Volumes/synapse/projects/SocialSpace/Projects/SNT-fmri_CUD/Data/Scans/spm_preprocessing/subs/22010/func';
+sub_dir = '/Volumes/synapse/projects/SocialSpace/Projects/SNT-fmri_CUD/Data/Scans/spm_preprocessing/subs/22010';
 
 % trials, bold_evemt, {pmod, pmod_normalization}
 model1 = {'all', 'decision', []}; % 1 cond, no pmods
@@ -22,5 +22,5 @@ model7 = {'all', 'decision', {'affil_mean','z'; 'power_mean','z'};...
 models = [{model1}; {model2}; {model3}; {model4}; {model5}; {model6}; {'lsa'}; {'character'};...
           {'angle'}; {'distance'}; {'dimensions'};];
 for n_model = 1:length(models)
-    glm_specify_design(func_dir, models{n_model}, sprintf('testing_%02d', n_model), 1)
+    glm_specify_design_spmprep(sub_dir, models{n_model}, sprintf('testing_%02d', n_model), 1, 1)
 end

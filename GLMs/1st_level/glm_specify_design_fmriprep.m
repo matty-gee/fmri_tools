@@ -1,4 +1,4 @@
-function glm_specify_design(func_dir, model, glm_name, verbose)
+function glm_specify_design_fmriprep(func_dir, model, glm_name, verbose)
 
 %------------------------------------------------------------------------------
 % 
@@ -40,16 +40,15 @@ function glm_specify_design(func_dir, model, glm_name, verbose)
 %------------------------------------------------------------------------------
 
 
-addpath /sc/arion/projects/k23/code/fmri_utilities % add circ_mean here
+addpath /sc/arion/projects/k23/code/matlab_utilities 
+addpath /sc/arion/projects/k23/code/GLMs
 addpath /hpc/packages/minerva-centos7/spm/spm12
 
 f = filesep; % system-specific 
 
-% base_dir = [f 'sc' f 'arion' f 'projects' f 'k23'];
-base_dir = '/Volumes/synapse/projects/SocialSpace/Projects/SNT-fmri_CUD';
+base_dir = [f 'sc' f 'arion' f 'projects' f 'k23'];
 split_   = strsplit(func_dir, '/');
 sub_id   = erase(split_{end-1}, 'sub-P');
-
 beh_dir  = [base_dir f 'Data' f 'SNT']; 
 glm_dir  = [base_dir f 'GLMs' f glm_name f 'subs' f sub_id]; % for the output
 if ~exist(glm_dir, 'dir'), mkdir(glm_dir), end
@@ -62,25 +61,19 @@ disp(['Preparing to run GLM for ' sub_id '...'])
 
 
 % funcional images
-func_name = 'wau_func'; 
-% img_unzip(func_dir, func_fname)
+func_fname = '^s.*preproc_bold';
+img_unzip(func_dir, func_fname)
 func_imgs = cellstr(spm_select('ExtFPList', func_dir, [func_name '.nii$']));
 
-% if smooth
-%     img_smooth(spm_select('ExtFPList', func_dir, [func_name '.nii']), 6)
-%     func_imgs = cellstr(spm_select('ExtFPList', func_dir, [func_fname '_smoothed6.nii']));  
-% end
-
-% masking
-glm.mthresh  = 0.50; % default=0.8; -Inf allows for explicit masks
-glm.mask_img = '';
-% img_unzip(func_dir, '^s.*brain_mask')
-% glm_model.mthresh  = -Inf; % default=0.8; -Inf allows for explicit masks
-% glm_model.mask_img = spm_select('FPList', func_dir, '^s.*brain_mask.nii$');
+if strcmp(glm_name, 'lsa') 
+    func_imgs = cellstr(spm_select('ExtFPList', func_dir, '^s.*preproc_bold.nii$')); % use unsmoothed images
+else
+    img_smooth(spm_select('ExtFPList', func_dir, [func_fname '.nii$']), 6)
+    func_imgs = cellstr(spm_select('ExtFPList', func_dir, [func_fname '_smoothed6.nii$']));  
+end
 
 % nuisance regrs
-nuisance_txt = [func_dir f 'rp.txt']; 
-% nuisance_txt = cfd_fmriprep_nuisance_txt(func_dir, cfds);
+nuisance_txt = fmriprep_cfd_nuisance_txt(func_dir, cfds);
 
 
 %------------------------------------------------------------------------------
@@ -99,17 +92,25 @@ timing   = sortrows(timing, 'onset', 'ascend');
 %------------------------------------------------------------------------------   
 
 
-% make desgin
-glm     = glm_make_design(model, timing, behavior, glm_dir, verbose);
+glm = glm_make_design(model, timing, behavior, glm_dir, verbose);
+
+% estimating the events 
 glm.tr  = 1; 
 glm.mr  = 70; % microtime resolution: number of slices collected
 glm.mo  = glm.mr/2; 
 glm.hrf = [0 0]; 
+
+% filtering etc
 glm.hpf = 128; % default = 128s (1/128 Hz) [or: max(diff(pmod_model.decision_onsets))]
 glm.cvi = 'FAST'; % prewhitening to remove autocorrelated signal 
 
-glm.model_post_decisions = 0;
-glm.write_residuals      = 0; % write residuals (1) or not (0) [eg, 1 if want to do func conn after]
+% masking
+img_unzip(func_dir, '^s.*brain_mask')  
+glm.mthresh  = -Inf; % -Inf allows for explicit masks
+glm.mask_img = spm_select('FPList', func_dir, '^s.*brain_mask.nii$');
+
+% residuals for fc? 
+glm.write_residuals = 0; 
 
 % clean up glm design object so can pass glm.cond directly into spm
 glm.cond = rmfield(glm.cond, 'trials');

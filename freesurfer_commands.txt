@@ -1,0 +1,3 @@
+
+# run in shell:
+aparcstats2table --subjects sub_01 sub_02 sub_03 sub_04 --hemi rh --meas thickness --tablefile aparc_stats.txt

@@ -1,5 +1,6 @@
 function cfd_num = fmriprep_cfd_replace_firstvol(cfd, method)
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    %------------------------------------------------------------------------------
     % Replace the first volume in fmriprep confound by some method
     %
     % Arguments
@@ -9,9 +10,8 @@ function cfd_num = fmriprep_cfd_replace_firstvol(cfd, method)
     %   'mean' or 'zero'
     %
     % [By Matthew Schafer, github: @matty-gee; 2020ish] 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%s
+    %------------------------------------------------------------------------------
 
-    % 
 
     cfd_num = str2num(cfd(2:end,:)); % it's strings
     if strcmp(method, 'mean')

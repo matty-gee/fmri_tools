@@ -1,30 +1,44 @@
-function glm_make_design_matrix(func_imgs, glm_model, nuisance_txt, glm_dir)
+% design matrix plotting
+events   = {glm.cond(2).onset};
+n_vols   = 1570; % number of overall volumes
+n_events = length(events{1});   % number of events
 
-    spm('defaults', 'FMRI')
 
-    % io
-    batch{1}.spm.stats.fmri_spec.dir              = {glm_dir}; 
-    batch{1}.spm.stats.fmri_spec.sess.scans       = func_imgs; 
+% % Create and display a table of these onset times:
+% t = table(onsets{1}(:, 1), onsets{1}(:, 2), onsets{2}(:, 1), onsets{2}(:, 2), 'VariableNames', {'Evt1_Time' 'Evt1_Dur' 'Evt2_Time' 'Evt2_Dur'});
+% disp(t)
+% 
+% clear X bfname
 
-    % timing 
-    batch{1}.spm.stats.fmri_spec.timing.units     = 'secs';
-    batch{1}.spm.stats.fmri_spec.timing.RT        = glm_model.tr;
-    batch{1}.spm.stats.fmri_spec.timing.fmri_t    = glm_model.mr; % microtime resolution: how many time-bins to use per volume to build regressors; if stc, set to number of slices
-    batch{1}.spm.stats.fmri_spec.timing.fmri_t0   = glm_model.mo; % microtime onset: if stc, match ref slice (probably middle slice)
+% Build three models: Convolve with three basis sets (need SPM on path)
+% 1: canonical, 2: 3-parameter, 3: FIR
 
-    % condtions (incl. parametric modulation)
-    for c = 1 : length(glm_model.cond)        
-        batch{1}.spm.stats.fmri_spec.sess.cond(c) = glm_model.cond(c);
-    end
+bfname{1} = 'Canonical HRF';
+X{1} = onsets2fmridesign(events, 1, n_vols, spm_hrf(1));
 
-    % nuisance regressors
-    batch{1}.spm.stats.fmri_spec.sess.multi_reg   = {nuisance_txt};
+bfname{2} = 'hrf (with time and dispersion derivatives)';
+X{2} = onsets2fmridesign(events, 1, n_vols, bfname{2});
 
-    % filtering, masking etc
-    batch{1}.spm.stats.fmri_spec.sess.hpf         = glm_model.hpf; % default = 128s (1/128 Hz); rule of thumb: threshold at 2-3x average (or max) intervals (s) between predictor onsets
-    batch{1}.spm.stats.fmri_spec.bases.hrf.derivs = glm_model.hrf; 
-    batch{1}.spm.stats.fmri_spec.mthresh          = glm_model.mthresh; % '-Inf': all voxels
-    batch{1}.spm.stats.fmri_spec.mask             = {glm_model.mask_img}; % explicit mask
-    batch{1}.spm.stats.fmri_spec.cvi              = glm_model.cvi; % pre-whitening of serial correlations: default='AR(1)' or 'FAST'; FAST might be better at removing temporally autocorrelated BOLD signal (Olszowy et al 2018)
+bfname{3} = 'Finite Impulse Response';
+X{3} = onsets2fmridesign(events, 1, n_vols, bfname{3});
 
-    spm_jobman('run', batch);
+create_figure('X_3basis sets', 2, 3);
+
+for i = 1:3
+
+    subplot(2, 3, i)
+    h = plot_matrix_cols(zscore(X{i}(:, 1:end-1)), 'vertical');
+    set(gca, 'XColor', 'w', 'YTick', [0:20:100]);
+    axis tight
+    title(bfname{i})
+    ylabel('Time')
+
+    subplot(2, 3, 3+i)
+    imagesc(X{i}(:, 1:end-1))
+    set(gca, 'YDir', 'Reverse', 'XTickLabel', []);
+    ylabel('Time')
+    axis tight
+
+end
+
+drawnow, snapnow

@@ -1,7 +1,7 @@
 
 function nuisance_txt = fmriprep_cfd_nuisance_txt(func_dir, nuisance)
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %------------------------------------------------------------------------------
     % Creates a .txt from fmriprep confounds file with specified nuisance variables
     %
     % Arguments
@@ -20,7 +20,7 @@ function nuisance_txt = fmriprep_cfd_nuisance_txt(func_dir, nuisance)
     %   name of nuisance text file
     %
     % [By Matthew Schafer, github: @matty-gee; 2020ish] 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %------------------------------------------------------------------------------
 
     % minerva paths to add;  if not on minerva, no harm no foul
     addpath hpc/packages/minerva-centos7/spm/spm12
