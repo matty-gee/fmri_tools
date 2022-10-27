@@ -1,37 +1,19 @@
 function glm_specify_design_spmprep(sub_dir, model, glm_name, verbose, debug)
 
 %------------------------------------------------------------------------------
+% Specify the design for a first-level GLM
 % 
-% 
+%
 % Arguments
 % ---------
-% func_dir
+% func_dir : str
+% model : str or cell array (see below)
+% glm_name : str
+% write_residuals : bool
+% verbose : bool
+% 
 %
-% model
-%
-% write_residuals
-% output
-% verbose
-%
-%
-% Accepted model names:
-%
-%
-%
-% Example model array:
-% use ';' to separate diff conditions and diff pmods within condition
-% eg: a model with one condition but 2 pmods: 
-% model = {cond_trials, bold_event [optional],...
-%         {cond_pmod1 [optional], cond_pmod1_normalization [optional];...
-%          pmod2 [optional], pmod2_normalization [optional];}}
-%
-% eg: a model with two conditions and 1 pmod each: 
-% model = {cond1_trials, bold_event [optional],...
-%         {cond1_pmod1 [optional], cond1_pmod1_normalization [optional]};... 
-%         {cond2_trials, bold_event [optional],...
-%         {cond2_pmod1 [optional], cond2_pmod1_normalization [optional]};... 
-%
-%
+% [By Matthew Schafer, github: @matty-gee; 2020ish] 
 %------------------------------------------------------------------------------
 
 

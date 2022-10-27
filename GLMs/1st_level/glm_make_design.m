@@ -1,7 +1,7 @@
 function glm_design = glm_make_design(model, timing, behavior, glm_dir, verbose)
 
 %------------------------------------------------------------------------------
-% Make the design for a first-level GLM
+% Make the design for a first-level GLM; also specifies some basic t-contrasts
 % 
 % 
 % Arguments

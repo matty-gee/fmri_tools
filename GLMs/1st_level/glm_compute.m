@@ -34,17 +34,17 @@ f = filesep; % system specific
 
 
 % check the nifti length
-if (length(func_imgs) ~= 1570) && (length(func_imgs) ~= 784 && (length(func_imgs) ~= 848))
-    error(['ERROR: Wrong number of func. volumes: ' num2str(length(func_imgs)) ' instead of 784, 848 or 1570.'])
-end
+% if (length(func_imgs) ~= 1570) && (length(func_imgs) ~= 784 && (length(func_imgs) ~= 848))
+%     error(['ERROR: Wrong number of func. volumes: ' num2str(length(func_imgs)) ' instead of 784, 848 or 1570.'])
+% end
 
 % delete any old spm.mats if incompleted
-if (isfile([glm_dir f 'SPM.mat'])) && (~isfile([glm_dir f 'RPV.nii']))
+if (isfile([glm_dir f 'SPM.mat'])) && (~isfile([glm_dir f 'con_0001.nii'])) % (~isfile([glm_dir f 'RPV.nii']))
     disp('Unfinished old estimation. Deleting old SPM.mat')
     delete([glm_dir f 'SPM.mat'])
 
 % skip if already completed
-elseif (isfile([glm_dir f 'SPM.mat'])) && (isfile([glm_dir f 'RPV.nii']))
+elseif (isfile([glm_dir f 'SPM.mat'])) && (isfile([glm_dir f 'con_0001.nii']))
     error('Estimation appears to have been completed already. Exiting.')
 end
 
