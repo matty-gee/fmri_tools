@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#--------------------------------------------------------------------------------------------------
 # (1) Download dicoms from XNAT & (2) run dcm2bids conversion 
 # By Tien Tong, with edits by Matthew Schafer, 2022
 
@@ -12,20 +13,24 @@
 # - lib/xnat_credentials.txt :
 # - lib/xnat_download.py :
 
-# to run from terminal: $ sh bids_conversion.sh
+# to run from terminal: 
+# - $ conda activate dcm2bids
+# - $ sh bids_conversion.sh
 
 ## UPDATE THESE TO REFLECT OWN PATHS
-code_dir=/Users/matty_gee/Dropbox/Projects/fmri_tools/dcm2bids/lib 
+code_dir=/Users/matty_gee/Dropbox/Projects/preprocessing/dcm2bids/lib 
 dcms_dir=/Volumes/synapse/projects/SocialSpace/Projects/SNT-fmri_CUD/Data/Scans/DICOM
 bids_dir=/Volumes/synapse/projects/SocialSpace/Projects/SNT-fmri_CUD/Data/Scans/BIDS
 
-###############################################################################
-####################### STEP 1: DOWNLOAD XNAT DICOM DATA ######################
-###############################################################################
+#--------------------------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------------------------------
+# STEP 1: DOWNLOAD XNAT DICOM DATA
+#--------------------------------------------------------------------------------------------------
 
 # CHANGE THE NEXT TWO LINES:
-range_subject="82-83" # specify the index (from 1) to download dcms for
-num_subject=4 # how many subjects to convert
+range_subject="83-84" # specify the index (from 1) to download dcms for
+num_subject=1 # how many subjects to convert
 
 rm -rf $bids_dir/tmp_dcm2bids
 
@@ -36,9 +41,9 @@ $code_dir/xnat_download.py \
   --password `sed -n 2p $code_dir/xnat_credentials.txt` \
   --download_dir $dcms_dir
  
-###############################################################################
-################### STEP 2: CONVERT TO NIFTI AND PUT IN BIDS ##################
-###############################################################################
+#--------------------------------------------------------------------------------------------------
+# STEP 2: CONVERT TO NIFTI AND PUT IN BIDS
+#--------------------------------------------------------------------------------------------------
 
 new_download=($(ls -td $dcms_dir/* | head -${num_subject}))
 for i in ${!new_download[@]} ; do
@@ -46,7 +51,7 @@ for i in ${!new_download[@]} ; do
 
     mv ${new_download[$i]} $dcms_dir/${subject_id}
 
-    ################### STEP 2.1a: CONVERT TO NIFTY AND PUT IN BIDS ############
+    #------------- STEP 2.1a: CONVERT TO NIFTY AND PUT IN BIDS -------------#
     echo "Start doing BIDS conversion for subject" ${subject_id}
     dcm2bids \
       -d $dcms_dir/${subject_id}/*/scans \
@@ -55,9 +60,9 @@ for i in ${!new_download[@]} ; do
       -o $bids_dir \
       --clobber --forceDcm2niix
 
-    ###############################################################################
-    ############################ STEP 3: MODIFY JSON FILES ########################
-    ###############################################################################
+    #--------------------------------------------------------------------------------------------------
+    # STEP 3: MODIFY JSON FILES 
+    #--------------------------------------------------------------------------------------------------
 
     # add task name to .json file. eg: "TaskName": "${task}"
     # add IntendedFor for fmap
@@ -69,9 +74,9 @@ for i in ${!new_download[@]} ; do
 
 done
 
-########################################################################################################
-##### UNUSED
-########################################################################################################
+#--------------------------------------------------------------------------------------------------
+# UNUSED
+#--------------------------------------------------------------------------------------------------
 #     # ######################## STEP 2.1b: RENAME FILES ###########################
 #     # # run and echo were flipped using dcm2bids, have to switch them back
 #     # subject_func=$bids_dir/sub-${subject_id}/func

@@ -1,4 +1,4 @@
-function glm_specify_design_spmprep(sub_dir, model, glm_name, verbose, debug)
+function glm_specify_design(sub_dir, preprc, model, glm_name, write_residuals, verbose, debug)
 
 %------------------------------------------------------------------------------
 % Specify the design for a first-level GLM
@@ -6,12 +6,7 @@ function glm_specify_design_spmprep(sub_dir, model, glm_name, verbose, debug)
 %
 % Arguments
 % ---------
-% func_dir : str
-% model : str or cell array (see below)
-% glm_name : str
-% write_residuals : bool
-% verbose : bool
-% 
+
 %
 % [By Matthew Schafer, github: @matty-gee; 2020ish] 
 %------------------------------------------------------------------------------
@@ -27,13 +22,15 @@ addpath /sc/arion/projects/k23/code/GLMs
 addpath /hpc/packages/minerva-centos7/spm/spm12
 
 f = filesep; % system-specific 
+
 func_dir = [sub_dir f 'func'];
 split    = strsplit(sub_dir, '/');
 sub_id   = erase(split{end}, 'sub-P');
-    
+
+% option to debug locally
 if debug
     beh_dir  = '/Volumes/synapse/projects/SocialSpace/Projects/SNT-fmri_CUD/Data/SNT'; 
-    glm_dir  = [beh_dir f 'GLM_debug'];
+    glm_dir  = ['/Volumes/synapse/projects/SocialSpace/Projects/SNT-fmri_CUD' f 'TEST_GLM'];
 else
     base_dir = [f 'sc' f 'arion' f 'projects' f 'OlfMem' f 'mgs' f '2D_place'];
     sample   = split{end-3};
@@ -52,19 +49,26 @@ disp(['Preparing to run GLM for ' sub_id '...'])
 
 
 % funcional images
-func_name = 'wau_func'; 
+if strcmp(preprc, 'spm')
+    func_name = 'wau_func'; 
+elseif strcmp(preprc, 'fmriprep')
+    func_fname = '^s.*preproc_bold';
+    img_unzip(func_dir, func_fname)
+end    
 func_imgs = cellstr(spm_select('ExtFPList', func_dir, [func_name '.nii$']));
 
-if ~debug
-    if ~strcmp(model, 'lsa') % if not lsa, smooth 
-        img_smooth(spm_select('ExtFPList', func_dir, [func_name '.nii']), 6)
-        func_imgs = cellstr(spm_select('ExtFPList', func_dir, [func_name '_smoothed6.nii']));  
-    end
-end
+% smooth or not
+if (~strcmp(model, 'lsa')) && (~debug) % if not lsa, smooth 
+    img_smooth(spm_select('ExtFPList', func_dir, [func_name '.nii']), 6)
+    func_imgs = cellstr(spm_select('ExtFPList', func_dir, [func_name '_smoothed6.nii']));  
+end    
 
 % nuisance regrs
-nuisance_txt = [func_dir f 'rp.txt']; 
-
+if strcmp(preprc, 'spm')
+    nuisance_txt = [func_dir f 'rp.txt']; 
+elseif strcmp(preprc, 'fmriprep')
+    nuisance_txt = fmriprep_cfd_nuisance_txt(func_dir, cfds);
+end 
 
 %------------------------------------------------------------------------------
 % behavioral files to define onsets, durations, pmods
@@ -76,15 +80,16 @@ behavior = sortrows(behavior, 'decision_num', 'ascend');
 timing   = readtable([beh_dir f 'Timing' f 'SNT_' sub_id '_timing.xlsx']); % change to hardcode if single timing file
 timing   = sortrows(timing, 'onset', 'ascend');
 
+if verbose
+    fprintf('%d timing file size\n', size(timing))
+    fprintf('%d behavioral file size\n', size(behavior))
+end
+
 
 %------------------------------------------------------------------------------
 % make design & compute glm
 %------------------------------------------------------------------------------   
 
-if verbose
-    disp(size(timing))
-    disp(size(behavior))
-end
 
 glm = glm_make_design(model, timing, behavior, glm_dir, verbose);
 
@@ -99,11 +104,17 @@ glm.hpf = 128; % default = 128s (1/128 Hz) [or: max(diff(pmod_model.decision_ons
 glm.cvi = 'FAST'; % prewhitening to remove autocorrelated signal 
 
 % masking
-glm.mthresh  = 0.50; % default=0.8
-glm.mask_img = '';
+if strcmp(preprc, 'spm')
+    glm.mthresh  = 0.50; % default=0.8
+    glm.mask_img = '';
+elseif strcmp(preprc, 'fmriprep')
+    img_unzip(func_dir, '^s.*brain_mask')  
+    glm.mthresh  = -Inf; % -Inf allows for explicit masks
+    glm.mask_img = spm_select('FPList', func_dir, '^s.*brain_mask.nii$');
+end
 
-% residuals for fc?
-glm.write_residuals = 0;
+% write out residuals (e.g. for fc)
+glm.write_residuals = write_residuals;
 
 % clean up glm design object so can pass glm.cond directly into spm
 glm.cond = rmfield(glm.cond, 'trials');

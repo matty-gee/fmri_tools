@@ -41,7 +41,7 @@ def parse_cmdline():
 
 def main():
 
-    # Try running with these args, eg: -n 5 -u tongt03
+    # try running with these args, eg: -n 5 -u tongt03
     args = parse_cmdline().parse_args()
     range_subject = args.range_subject
     username = args.username

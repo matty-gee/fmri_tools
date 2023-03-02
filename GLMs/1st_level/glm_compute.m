@@ -117,10 +117,10 @@ end
 
 
 %------------------------------------------------------------------------------------
-% clean up
+% clean up files
 %------------------------------------------------------------------------------------
 
-% if outputting residuals, concatenate residuals images
+% if outputting residuals, concatenate 3D residuals images into 4D image
 if glm_design.write_residuals == 1
     res_3d = spm_select('FPList', glm_dir, '^Res_.*nii$');
     if isempty(res_3d), error('The residual images are missing'), end
@@ -128,7 +128,7 @@ if glm_design.write_residuals == 1
     for r = 1 : length(res_3d), delete(res_3d(r, :)), end
 end
 
-% concatenate lsa images (lsa has 64 conditions: narrative (1) + 63 trials (2:64))
+% if lsa, concatenate 3D lsa images into 4D image (lsa has 64 conditions: narrative (1) + 63 trials (2:64))
 if length(glm_design.cond) == 64
     beta_3d = spm_select('FPList', glm_dir, '^beta.*nii$');
     spm_file_merge(beta_3d(2 : 64, :), 'beta_4d.nii'); % skip first beta image: narrative condition

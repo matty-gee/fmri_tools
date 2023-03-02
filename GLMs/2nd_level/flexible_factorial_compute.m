@@ -17,6 +17,7 @@ function flexible_factorial_compute(subjects, cov, out_dir)
     % -- for group, should prob. assume independence and unequal variance
     % -- main fx: produces # of regressors = factor levels 
     % -- interaction fx:  produces # of regressors = factor levels * condition
+    
     batch{1}.spm.stats.factorial_design.des.fblock.fac.name     = 'group'; 
     batch{1}.spm.stats.factorial_design.des.fblock.fac.dept     = 0; % 0=independence
     batch{1}.spm.stats.factorial_design.des.fblock.fac.variance = 1; % 1=unequal variance
@@ -36,6 +37,7 @@ function flexible_factorial_compute(subjects, cov, out_dir)
     % -- c: values
     % -- iCFI: covariate x factor interactions (creates addtl regressors)
     % -- iCC: centering: makes intercept more interpretable
+    
     batch{1}.spm.stats.factorial_design.cov = cov;
     
     % masking, etc

@@ -1,18 +1,23 @@
-% maybe turn into all stand alone modules so I can do my own preprocessing, flexibly...
-
 clear
+
+%%------------------------------------------------------------------------------------
+%% spm 
+%%------------------------------------------------------------------------------------
 
 spm_dir = '/Users/matthew/Documents/MATLAB/spm12';
 spm_jobman('initcfg');
 spm('defaults', 'FMRI');
 
+%%------------------------------------------------------------------------------------
 %% Subjects
+%%------------------------------------------------------------------------------------
 
 nii_dir = '/Volumes/synapse/projects/SocialSpace/Projects/SNT-fmri_CUD/Data/Scans/spm/new';
 subs    = cellstr(spm_select('List', nii_dir, 'dir'));
 
+%%------------------------------------------------------------------------------------
 %% Scan acquisition parameters
-% -- to read dicom use: dicominfo('dicom.dcm')
+%%------------------------------------------------------------------------------------
 
 % slice acquisition order is in ms for multiband data
 slice_order = [0; 685; 392.5; 97.5; 782.5; 490.00000001; 195.00000001; 882.50000001; 587.49999999; 292.5; 
@@ -43,15 +48,17 @@ ta          = tr-(tr/nslices);
 
 for n = 1 : length(subs)
     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%------------------------------------------------------------------------------------
     % get data
+    %%------------------------------------------------------------------------------------
     
     sub_path   = [nii_dir '/' subs{n}]; 
     func_imgs  = cellstr(spm_select('ExtFPList', [sub_path '/func/'], '^sub.*nii$'));
     struct_img = cellstr(spm_select('FPList', [sub_path '/anat/'], '^sub.*nii$')); 
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%------------------------------------------------------------------------------------
     % re-align & unwarp
+    %%------------------------------------------------------------------------------------
     
     % realignment: realign timeseries to ref image with least squares and 6 parameter
     % -- (rigid body) spatial transformation
@@ -86,8 +93,9 @@ for n = 1 : length(subs)
     batch{1}.spm.spatial.realignunwarp.uwroptions.mask = 1;
     batch{1}.spm.spatial.realignunwarp.uwroptions.prefix = 'u';
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%------------------------------------------------------------------------------------
     % slice-time correction
+    %%------------------------------------------------------------------------------------
     
     batch{2}.spm.temporal.st.scans{1}(1) = cfg_dep('Realign & Unwarp: Unwarped Images (Sess 1)', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','sess', '()',{1}, '.','uwrfiles'));
     batch{2}.spm.temporal.st.nslices = nslices;
@@ -97,7 +105,7 @@ for n = 1 : length(subs)
     batch{2}.spm.temporal.st.refslice = ref_slice;
     batch{2}.spm.temporal.st.prefix = 'a';
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%------------------------------------------------------------------------------------
     % co-registration: align t1 & functional images
     % -- some diffs from realignment: images prob have slightly diff shapes
     % ---- and diff tissue intensities & therefore have some mre steps
@@ -105,7 +113,8 @@ for n = 1 : length(subs)
     % -- ref: reference image that remains stationary (mean image from realignment & unwarping)
     % -- source: image moved to match the ref (t1 image)
     % -- other: remain in alignment with source img (get same transformation as source) (realigned & slice time corrected t2*)
-        
+    %%------------------------------------------------------------------------------------
+
     batch{3}.spm.spatial.coreg.estimate.ref(1) = cfg_dep('Realign & Unwarp: Unwarped Mean Image', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','meanuwr'));
     batch{3}.spm.spatial.coreg.estimate.source = struct_img;
     batch{3}.spm.spatial.coreg.estimate.other(1) = cfg_dep('Slice Timing: Slice Timing Corr. Images (Sess 1)', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('()',{1}, '.','files'));
@@ -114,7 +123,7 @@ for n = 1 : length(subs)
     batch{3}.spm.spatial.coreg.estimate.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
     batch{3}.spm.spatial.coreg.estimate.eoptions.fwhm = [7 7];
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%------------------------------------------------------------------------------------
     % segmentation: part of the unified segmentation & normalization algorithm in spm 
     
     % tissue types: 1 = grey matter, 2 = white matter, 3 = csf
@@ -130,7 +139,8 @@ for n = 1 : length(subs)
     % -- r = for dartel toolbox
     % -- m = modulated
     % ---- preserve gm signal in normalized partitions by compensating for volumetric changes induced by spatial normalization
-        
+    %%------------------------------------------------------------------------------------
+
     native = [1 1];
     warped = [1 1];
     
@@ -178,8 +188,9 @@ for n = 1 : length(subs)
     batch{4}.spm.spatial.preproc.warp.samp = 3;
     batch{4}.spm.spatial.preproc.warp.write = [1 1]; % save forward (to normalize to MNI) & inverse (to normalize, eg, GIFTI files) deformation fields: [inverse forward]
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%------------------------------------------------------------------------------------
     % normalization: apply segmentation forward deformation on coregistered imgs
+    %%------------------------------------------------------------------------------------
     
     batch{5}.spm.spatial.normalise.write.subj.def(1) = cfg_dep('Segment: Forward Deformations', substruct('.','val', '{}',{4}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','fordef', '()',{':'}));
     batch{5}.spm.spatial.normalise.write.subj.resample(1) = cfg_dep('Coregister: Estimate: Coregistered Images', substruct('.','val', '{}',{3}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','cfiles'));
@@ -189,8 +200,9 @@ for n = 1 : length(subs)
     batch{5}.spm.spatial.normalise.write.woptions.interp = 4; % interpolation default = 4th degree B-Spline; higher degrees are slower b/c use more neighbors
     batch{5}.spm.spatial.normalise.write.woptions.prefix = 'w';
     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%------------------------------------------------------------------------------------
     %     % smoothing: 6 mm (pretty standard in lit)
+    %%------------------------------------------------------------------------------------
     
     %     batch{6}.spm.spatial.smooth.data(1) = cfg_dep('Normalise: Write: Normalised Images (Subj 1)', substruct('.','val', '{}',{5}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('()',{1}, '.','files'));
     %     batch{6}.spm.spatial.smooth.fwhm = [6 6 6];

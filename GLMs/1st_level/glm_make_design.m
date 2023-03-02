@@ -24,8 +24,6 @@ function glm_design = glm_make_design(model, timing, behavior, glm_dir, verbose)
 % 
 %
 %
-%
-%
 % Example model cell array: 
 % >> model = {'all', 'decision', {'pov3d_angle','cos'}};
 % 
@@ -51,7 +49,10 @@ cond_struct = @(n,o,d,t) struct('name', n, 'onset', o, 'duration', d, 'trials', 
                                 'pmod', struct('name', {}, 'param', {}, 'poly', {}, 'normalized', {}));  
 event_durations = struct('onset', zeros(63,1), 'epoch', ones(63,1) * 12, 'decision', behavior.reaction_time);
 event_weights   = zeros(63,1);
-normalize = struct('none', @(X) X, 'z', @(X) zscore(X), 'cos', @(X) cos(X), 'cosd', @(X) cosd(X));
+normalize = struct('none', @(X) X, 'z', @(X) zscore(X),...
+                   'cos', @(X) cos(X), 'sin', @(X) sin(X),...
+                   'cosd', @(X) cosd(X), 'sind', @(X) sind(X),...
+                   'demean', @(X) X - mean(X));
 
 
 %------------------------------------------------------------------------------
@@ -70,18 +71,31 @@ if ischar(model)
         case 'character' 
             model = {};
             for n_char = 1:5
-                model = [model; {sprintf('character0%d', n_char), 'decision',[]}];
-            end            
-        case 'angle'
-            model = {'all', 'decision', {'pov3d_angle','cos'}};
-        case 'distance'
-            model = {'all', 'decision', {'pov_distance','z'}};
+                model = [model; {sprintf('character0%d', n_char), 'decision', []}];
+            end
         case 'dimensions'
             model = {'affil', 'decision', []; 'power', 'decision', []};
+        case 'cos_angle'
+            model = {'all', 'decision', {'pov_3d_angle','cos'}};
+        case 'sin_angle'
+            model = {'all', 'decision', {'pov_3d_angle','sin'}};
+        case 'distance'
+            model = {'all', 'decision', {'pov_dist','z'}};
+        case 'polar_cos'
+            model = {'all', 'decision', {'pov_3d_angle','cos'; 'pov_dist','z'}};
+        case 'polar_sin'
+            model = {'all', 'decision', {'pov_3d_angle','sin'; 'pov_dist','z'}};
+        case 'polar_full'
+            model = {'all', 'decision', {'pov_3d_angle','cos'; 'pov_3d_angle','sin'; 'pov_dist','z'}};
+        case 'character_polar'
+            model = {};
+            for n_char = 1:5
+                model = [model; {sprintf('character0%d', n_char), 'decision', {'pov_3d_angle', 'cos'; 'pov_dist', 'z'}}];
+            end
     end
 end
 
-% if character-wise model w/ pmods, specify each character condition
+% if the model is character-wise w/ pmods, we need to specify each character condition
 if strcmp(model{1}, 'character') 
     tmp = {};
     for n_char = 1:5
@@ -106,7 +120,9 @@ n_conds = n_conds + 1; % add in narrative
 
 
 % define the rest
-for n_cond = 2:n_conds
+decisions = timing(strcmp(timing.trial_type, 'Decision'), :);
+
+for n_cond = 2:n_conds % excl. #1 b/c thats narrative condition
 
     [cond_trials, bold_event, cond_pmods] = model{n_cond-1, :}; % unpack the model
 
@@ -140,7 +156,7 @@ for n_cond = 2:n_conds
 
     end
 
-    glm_design.cond(n_cond) = cond_struct(cond_name, behavior(trials_incl, :).onset, [], trials_incl);
+    glm_design.cond(n_cond) = cond_struct(cond_name, decisions(trials_incl, :).onset, [], trials_incl);
 
 
     %------------------------------------------------------------------------------
@@ -155,20 +171,27 @@ for n_cond = 2:n_conds
     regrs = [regrs, glm_design.cond(n_cond).name];
 
     % pmods [optional]
-    glm_design.cond(n_cond).orth = 0; % turn off orthogonalization
+    glm_design.cond(n_cond).orth = 0; % turn off orthogonalization - make sure uncorrelated...
     [n_cond_pmods, ~] = size(cond_pmods);
     for n_pmod = 1:n_cond_pmods
 
         [pmod_name, normlz] = cond_pmods{n_pmod, :};
-        regrs = [regrs, [glm_design.cond(n_cond).name '*' pmod_name]];
+        
+        if ~strcmp(normlz, 'none')
+           regr_name = [glm_design.cond(n_cond).name '*' normlz '(' pmod_name ')'];
+        else
+           regr_name = [glm_design.cond(n_cond).name '*' pmod_name]; 
+        end
+        regrs = [regrs, regr_name];
         param = behavior(trials_incl, pmod_name).Variables; 
         param = normalize.(normlz)(param);
         glm_design.cond(n_cond).pmod(n_pmod) = struct('name', pmod_name, 'param', param,...
-                                               'poly', 1, 'normalized', normlz);
+                                                      'poly', 1, 'normalized', normlz);
 
     end
 end
-n_tps = length(vertcat(glm_design.cond.onset));
+
+n_tps = length(vertcat(glm_design.cond.onset)); % number of timepoints
 
 
 %------------------------------------------------------------------------------
@@ -176,7 +199,7 @@ n_tps = length(vertcat(glm_design.cond.onset));
 %------------------------------------------------------------------------------
 
 
-% weight individual regrs (1) against baseline
+% weight individual regrs against baseline
 n_regrs = length(regrs);
 tcons = {};
 for n_regr = 1:n_regrs
@@ -193,6 +216,8 @@ for n_regr = 1:n_regrs
     tcon_name = [regrs{n_regr} '-'];
     tcons = [tcons, tcon_name];
     glm_design.consess{length(tcons)}.tcon = struct('name', tcon_name, 'weights', -tcon_weights);
+    
+    % maybe add option to average related ones...?
 
 end
 n_tcons = length(tcons);
@@ -236,11 +261,11 @@ end
 % output stuff
 %------------------------------------------------------------------------------
 
-f = filesep; % system-specific 
+f = filesep; % system-specific file separat
 
 % save the model details
 glm_design.model_array = model;
-save([glm_dir f 'GLM.mat'], '-struct', 'glm')
+save([glm_dir f 'GLM.mat'], '-struct', 'glm_design')
 
 % want to output a basic design matrix too, e.g., w canlab core tools
 

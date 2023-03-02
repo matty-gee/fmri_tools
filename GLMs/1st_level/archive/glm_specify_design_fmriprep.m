@@ -1,4 +1,4 @@
-function glm_specify_design_fmriprep(func_dir, model, glm_name, write_residuals, verbose)
+function glm_specify_design_fmriprep(func_dir, model, glm_name, write_residuals, verbose, debug)
 
 %------------------------------------------------------------------------------
 % Specify the design for a first-level GLM
@@ -91,7 +91,7 @@ img_unzip(func_dir, '^s.*brain_mask')
 glm.mthresh  = -Inf; % -Inf allows for explicit masks
 glm.mask_img = spm_select('FPList', func_dir, '^s.*brain_mask.nii$');
 
-% residuals for fc? 
+% write out residuals (e.g. for fc)
 glm.write_residuals = write_residuals; 
 
 % clean up glm design object so can pass glm.cond directly into spm
@@ -100,7 +100,7 @@ for n_cond = 1:length(glm.cond)
     glm.cond(n_cond).pmod = rmfield(glm.cond(n_cond).pmod, 'normalized');
 end
 
-% glm_compute(func_imgs, glm, nuisance_txt, glm_dir)
+if ~debug, glm_compute(func_imgs, glm, nuisance_txt, glm_dir), end
 
 
 %------------------------------------------------------------------------------

@@ -11,8 +11,8 @@ clear
 home_dir     = '/Volumes/synapse/projects/SocialSpace/Projects/SNT-fmri_CUD';
 glm_dir      = [home_dir '/Analyses/GLMs_fieldmaps_rp/angle_decision/'];
 
-subs_info    = dir([home_dir '/participants_qc_n*']);
-subs_info    = readtable([home_dir '/' subs_info.name]);
+subs_info    = dir([home_dir '/Data/Summary/participants_qc_n*']);
+subs_info    = readtable([home_dir '/Data/Summary/' subs_info.name]);
 summary_data = dir([home_dir '/Data/Summary/All-data_summary_n*']);
 summary_data = readtable([home_dir '/Data/Summary/' summary_data.name]);
 
@@ -59,7 +59,7 @@ for s = 1 : length(contrasts)
     % check for inclusion
     split_   = strsplit(contrasts{s}, '/');
     split_   = strsplit(split_{end}, '_');
-    sub_id   = erase(split_{1}, 'sub-P');
+    sub_id   = erase(split_{1}, 'sub-P')
     sub_info = subs_info(any(ismember(subs_info.sub_id, str2double(sub_id)), 2), :);
     sub_data = summary_data(any(ismember(summary_data.sub_id, str2double(sub_id)), 2), :);
     
@@ -125,12 +125,12 @@ for s = 1 : length(contrasts)
     end
 end
 
-% turn CTQ into categorical
-if any(strcmp(covs, 'CTQ'))
-    disp('Converting CTQ into categorical with median split')
-    i = find(strcmp(covs, 'CTQ')==1);
-    cov(i).c = (cov(i).c > median(cov(i).c)) * 1; % code > median as 1
-end
+% % turn CTQ into categorical
+% if any(strcmp(covs, 'CTQ'))
+%     disp('Converting CTQ into categorical with median split')
+%     i = find(strcmp(covs, 'CTQ')==1);
+%     cov(i).c = (cov(i).c > median(cov(i).c)) * 1; % code > median as 1
+% end
 
 %% run
 

@@ -41,8 +41,9 @@ for glm in ['angle', 'distance']:
                             f'ml spm\n\n',
                             f'cd {base_dir}/Code/GLMs/\n\n']
                 f.writelines(cookies)  
-                # args: sub_dir, model, glm_name, verbose, debug
-                f.write(f"matlab -nodisplay -r \"glm_specify_design_spmprep('{sub_dir}', '{glm}', '{glm}', {write_residuals}, 0);\"")
+                # matlab args: ssub_dir, preprc, model, glm_name, write_residuals, verbose, debug
+                f.write(f"matlab -nodisplay -r \"glm_specify_design('{sub_dir}', \
+                        'spm', '{glm}', '{glm}', {write_residuals}, 0, 0);\"")
 
             # submit the job
             print(f'{glm_dir}/subs/{sub_id}')

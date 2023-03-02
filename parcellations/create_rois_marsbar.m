@@ -1,11 +1,13 @@
 clear
-out_dir = '/Users/matty_gee/Desktop/new_rois';
+out_dir = '/Users/matty_gee/Desktop/2D_place/Pmod_masks';
 
 % define rois
 radii = [5; 10; 15]; % in mm
+
+roi_dir = '/Users/matty_gee/Dropbox/Projects/fmri_tools/parcellations';
+roi_table = readtable([roi_dir '/social-space_rois_new.xlsx']);
 % all_coords = [-45 41 -2; 51 50 1]; % coordinates are X,Y,Z
 % region_names = {'L-IFG'; 'R-IFG'};
-roi_table = readtable('social-space_rois.xlsx');
 
 % make rois
 fprintf('\n');
@@ -13,13 +15,14 @@ for r = 1 : length(radii)
     radius = radii(r); 
     for i = 1 : height(roi_table)
 
-        x = roi_table.x_MNI(i);
-        y = roi_table.y_MNI(i);
-        z = roi_table.z_MNI(i);
+        x = roi_table.MNI_X(i);
+        y = roi_table.MNI_Y(i);
+        z = roi_table.MNI_Z(i);
         coords = [x,y,z];
+        
         region_name = roi_table.ROI{i};
-        study_name = roi_table.Study{i};
-        cond_name = roi_table.Condition{i};
+        study_name  = roi_table.Study{i};
+        cond_name   = roi_table.Condition{i};
 
         fprintf('Working on ROI %d/%d...', i, height(roi_table));
         out_name = fullfile(out_dir, sprintf('%s_%s_%s_%i_%i_%i_%dmm', study_name, cond_name, region_name,...
