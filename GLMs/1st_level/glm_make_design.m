@@ -80,17 +80,17 @@ if ischar(model)
         case 'sin_angle'
             model = {'all', 'decision', {'pov_3d_angle','sin'}};
         case 'distance'
-            model = {'all', 'decision', {'pov_dist','z'}};
+            model = {'all', 'decision', {'pov_3d_dist','z'}};
         case 'polar_cos'
-            model = {'all', 'decision', {'pov_3d_angle','cos'; 'pov_dist','z'}};
+            model = {'all', 'decision', {'pov_3d_angle','cos'; 'pov_3d_dist','z'}};
         case 'polar_sin'
-            model = {'all', 'decision', {'pov_3d_angle','sin'; 'pov_dist','z'}};
+            model = {'all', 'decision', {'pov_3d_angle','sin'; 'pov_3d_dist','z'}};
         case 'polar_full'
-            model = {'all', 'decision', {'pov_3d_angle','cos'; 'pov_3d_angle','sin'; 'pov_dist','z'}};
+            model = {'all', 'decision', {'pov_3d_angle','cos'; 'pov_3d_angle','sin'; 'pov_3d_dist','z'}};
         case 'character_polar'
             model = {};
             for n_char = 1:5
-                model = [model; {sprintf('character0%d', n_char), 'decision', {'pov_3d_angle', 'cos'; 'pov_dist', 'z'}}];
+                model = [model; {sprintf('character0%d', n_char), 'decision', {'pov_3d_angle', 'cos'; 'pov_3d_dist', 'z'}}];
             end
     end
 end

@@ -7,26 +7,22 @@ clear
 % -- best for anovas where dont want to test all possible main & interaction fx
 
 %% data
-
 home_dir     = '/Volumes/synapse/projects/SocialSpace/Projects/SNT-fmri_CUD';
 glm_dir      = [home_dir '/Analyses/GLMs_fieldmaps_rp/angle_decision/'];
+
+%----------------------------------------------------------------------------------------------
+% covariate information in excel sheets
 
 subs_info    = dir([home_dir '/Data/Summary/participants_qc_n*']);
 subs_info    = readtable([home_dir '/Data/Summary/' subs_info.name]);
 summary_data = dir([home_dir '/Data/Summary/All-data_summary_n*']);
 summary_data = readtable([home_dir '/Data/Summary/' summary_data.name]);
 
-contrasts    = cellstr(spm_select('FPList', [glm_dir '/images'], '.*con_0003.nii')); 
-
-subjects     = struct();
-out_dir      = [glm_dir '/flexible-factorial'];
-if ~exist(out_dir, 'dir'), mkdir(out_dir), end
-
-%% covariates
-% iCFI: interactions w/ experimental factor (creates an addtl regressor)
-% - 1 = None, 2-4 = w/ factor 1-3
-% iCC: centering
-% - 1 = overall mean, 2-4 = factor 1-3 mean, 5 = no centering
+% define covariates
+    % iCFI: interactions w/ experimental factor (creates an addtl regressor)
+    % - 1 = None, 2-4 = w/ factor 1-3
+    % iCC: centering
+    % - 1 = overall mean, 2-4 = factor 1-3 mean, 5 = no centering
 
 covs = {'CTQ', 'Age', 'Sex'}; 
 cov  = struct();
@@ -51,7 +47,13 @@ for c = 1 : length(covs)
     
 end
 
-%% organize 
+%----------------------------------------------------------------------------------------------
+
+% scans from 1st level
+contrasts    = cellstr(spm_select('FPList', [glm_dir '/images'], '.*con_0003.nii')); 
+subjects     = struct();
+out_dir      = [glm_dir '/flexible-factorial'];
+if ~exist(out_dir, 'dir'), mkdir(out_dir), end
 
 n = 0; n_cd = 0; n_hc = 0;
 for s = 1 : length(contrasts)
