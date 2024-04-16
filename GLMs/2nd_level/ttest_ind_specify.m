@@ -6,7 +6,7 @@ glm_dir = [home_dir '/GLMs/Pmods/egocentric_angles/fmriprep-rp+fd/'];
 
 % organize the contrast files...
 subs_info = readtable([home_dir '/participants_info.xlsx']);
-for cn = 1:2
+for cn = 1 : 2
 
     contrasts = cellstr(spm_select('FPList', [glm_dir '/contrast_images'], ['.*con_000' num2str(cn) '.nii']));
     cd_scans = {}; hc_scans = {};

@@ -35,7 +35,8 @@ function glm_design = glm_make_design(model, timing, behavior, glm_dir, verbose)
 % 'dimension' : 
 %
 %
-%
+% references:
+% - https://canlab.github.io/_pages/tutorials/html/setting_SPM_defaults.html
 % [By Matthew Schafer, github: @matty-gee; 2020ish] 
 %------------------------------------------------------------------------------
 
@@ -61,13 +62,21 @@ normalize = struct('none', @(X) X, 'z', @(X) zscore(X),...
 
 
 % if just a standard model name, create the model array now:
+neg_tcons = 1; % whether to output negative t-contrasts
 if ischar(model) 
     switch model
-        case 'lsa'
+        case 'lsa_onset'
             model  = {};
             for n_trial = 1:63
                 model = [model; {sprintf('trial%02d', n_trial), 'onset', []}];
             end
+            neg_tcons = 0;
+        case 'lsa_decision'
+            model  = {};
+            for n_trial = 1:63
+                model = [model; {sprintf('trial%02d', n_trial), 'decision', []}];
+            end
+            neg_tcons = 0;
         case 'character' 
             model = {};
             for n_char = 1:5
@@ -81,11 +90,7 @@ if ischar(model)
             model = {'all', 'decision', {'pov_3d_angle','sin'}};
         case 'distance'
             model = {'all', 'decision', {'pov_3d_dist','z'}};
-        case 'polar_cos'
-            model = {'all', 'decision', {'pov_3d_angle','cos'; 'pov_3d_dist','z'}};
-        case 'polar_sin'
-            model = {'all', 'decision', {'pov_3d_angle','sin'; 'pov_3d_dist','z'}};
-        case 'polar_full'
+        case 'polar'
             model = {'all', 'decision', {'pov_3d_angle','cos'; 'pov_3d_angle','sin'; 'pov_3d_dist','z'}};
         case 'character_polar'
             model = {};
@@ -213,10 +218,11 @@ for n_regr = 1:n_regrs
     glm_design.consess{length(tcons)}.tcon = struct('name', tcon_name, 'weights',  tcon_weights);
 
     % negative
-    tcon_name = [regrs{n_regr} '-'];
-    tcons = [tcons, tcon_name];
-    glm_design.consess{length(tcons)}.tcon = struct('name', tcon_name, 'weights', -tcon_weights);
-    
+    if neg_tcons
+        tcon_name = [regrs{n_regr} '-'];
+        tcons = [tcons, tcon_name];
+        glm_design.consess{length(tcons)}.tcon = struct('name', tcon_name, 'weights', -tcon_weights);
+    end
     % maybe add option to average related ones...?
 
 end

@@ -10,14 +10,20 @@ for dir_ in ['jobs', 'out']:
     if not os.path.exists(f'{batch_dir}/{dir_}'):
         os.makedirs(f'{batch_dir}/{dir_}')
 
+# diff options for job submission
+projects  = ['acc_guLab', 'acc_k23']
+queues    = ['private', 'premium']
+submit_to = 1
+
 # specify some glm stuff
 write_residuals = 0 
 overwrite       = False
 
+# subjects
 participants = pd.read_excel('participants_info.xlsx', usecols=['sub_id']).values.astype(int)
 
 for glm in ['lsa_decision']:
-    for sample in ['Initial']:
+    for sample in ['Validation']:
 
         # pick a subject
         glm_dir    = f'{base_dir}/Samples/{sample}/GLMs/{glm}'
@@ -36,10 +42,10 @@ for glm in ['lsa_decision']:
             with open(batch_sh, 'w') as f:
                 cookies = [ f'#!/bin/bash\n\n',
                             f'#BSUB -J {sub_id}_{glm}\n',
-                            f'#BSUB -P acc_guLab\n',
-                            f'#BSUB -q private\n',
+                            f'#BSUB -P {projects[submit_to]}\n',
+                            f'#BSUB -q {queues[submit_to]}\n',
                             f'#BSUB -n 2\n',
-                            f'#BSUB -W 00:15\n',
+                            f'#BSUB -W 00:20\n',
                             f'#BSUB -R rusage[mem=8000]\n',
                             f'#BSUB -o {batch_dir}/out/{sub_id}_{glm}.out\n',
                             f'#BSUB -L /bin/bash\n\n',

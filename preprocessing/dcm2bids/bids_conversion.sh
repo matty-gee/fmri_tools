@@ -1,13 +1,14 @@
 #!/bin/bash
 
 #--------------------------------------------------------------------------------------------------
-# (1) Download dicoms from XNAT & (2) run dcm2bids conversion 
-# By Tien Tong, with edits by Matthew Schafer, 2022
+# Run dcm2bids conversion 
 
 # requires: 
+
 # - environment.yml : load in python environment w/ req'd python modules: dcm2niix, dcm2bids & xnat
 # -- create conda enviornment: $ conda env create -f environment.yml
 # -- activate conda environment: $ conda activate dcm2bids
+
 # - lib/dcm2bids_config.json :
 # - lib/modify_json.py : 
 # - lib/xnat_credentials.txt :
@@ -17,62 +18,56 @@
 # - $ conda activate dcm2bids
 # - $ sh bids_conversion.sh
 
-## UPDATE THESE TO REFLECT OWN PATHS
-code_dir=/Users/matty_gee/Dropbox/Projects/preprocessing/dcm2bids/lib 
-dcms_dir=/Volumes/synapse/projects/SocialSpace/Projects/SNT-fmri_CUD/Data/Scans/DICOM
+## SHOULD REFLECT OWN PATHS
+code_dir=/Users/matty_gee/Dropbox/Projects/fmri_tools/preprocessing/dcm2bids/lib 
+dcms_dir=/Volumes/synapse/projects/SocialSpace/Projects/SNT-fmri_CUD/Data/Scans/DICOMS
 bids_dir=/Volumes/synapse/projects/SocialSpace/Projects/SNT-fmri_CUD/Data/Scans/BIDS
-
-#--------------------------------------------------------------------------------------------------
-
-#--------------------------------------------------------------------------------------------------
-# STEP 1: DOWNLOAD XNAT DICOM DATA
-#--------------------------------------------------------------------------------------------------
-
-# CHANGE THE NEXT TWO LINES:
-range_subject="83-84" # specify the index (from 1) to download dcms for
-num_subject=1 # how many subjects to convert
 
 rm -rf $bids_dir/tmp_dcm2bids
 
-echo "Start downloading XNAT data for" $num_subject "participant(s)"
-$code_dir/xnat_download.py \
-  --range_subject $range_subject \
-  --username `sed -n 1p $code_dir/xnat_credentials.txt` \
-  --password `sed -n 2p $code_dir/xnat_credentials.txt` \
-  --download_dir $dcms_dir
+# find the number of folders in the dcms_dir
+subject_folders=()
+for item in $dcms_dir/*; do
+  if [ -d "$item" ]; then
+    subject_folders+=("$item")
+  fi
+done
+
+num_subject=`ls -d $dcms_dir/*/ | wc -l`
+echo $num_subject " subjects to convert"
  
 #--------------------------------------------------------------------------------------------------
-# STEP 2: CONVERT TO NIFTI AND PUT IN BIDS
+# CONVERT TO NIFTI WITH BIDS FORMATTING
 #--------------------------------------------------------------------------------------------------
 
-new_download=($(ls -td $dcms_dir/* | head -${num_subject}))
-for i in ${!new_download[@]} ; do
-    subject_id=`echo ${new_download[$i]} | awk -F "/" '{print $NF}'`
+# loop over each folder in subject_folders
+for i in ${!subject_folders[@]} ; do
 
-    mv ${new_download[$i]} $dcms_dir/${subject_id}
+    subject_id=${subject_folders[$i]##*/}
+    # mv ${subject_folders[$i]} $dcms_dir/${subject_id}
 
-    #------------- STEP 2.1a: CONVERT TO NIFTY AND PUT IN BIDS -------------#
-    echo "Start doing BIDS conversion for subject" ${subject_id}
+    #------------- CONVERT TO NIFTI AND PUT IN BIDS -------------#
+    
+    echo "${i} BIDS conversion for subject" ${subject_id}
+
     dcm2bids \
-      -d $dcms_dir/${subject_id}/*/scans \
+      -d $dcms_dir/${subject_id}/dicoms \
       -p ${subject_id} \
       -c $code_dir/dcm2bids_config.json \
       -o $bids_dir \
-      --clobber --forceDcm2niix
+      #--clobber --forceDcm2niix
 
-    #--------------------------------------------------------------------------------------------------
-    # STEP 3: MODIFY JSON FILES 
-    #--------------------------------------------------------------------------------------------------
+    # #------------- MODIFY JSON FILES -------------#
+    # # add task name to .json file. eg: "TaskName": "${task}"
+    # # add IntendedFor for fmap
 
-    # add task name to .json file. eg: "TaskName": "${task}"
-    # add IntendedFor for fmap
-
-    echo ${subject_id}
-    $code_dir/modify_json.py \
-      --subject ${subject_id} \
-      --bids_path $bids_dir
+    # echo ${subject_id}
+    # $code_dir/modify_json.py \
+    #   --subject ${subject_id} \
+    #   --bids_path $bids_dir
 
 done
+
 
 #--------------------------------------------------------------------------------------------------
 # UNUSED

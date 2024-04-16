@@ -1,6 +1,6 @@
-function ttest_ind(scans1, scans2, out_dir)
+function ttest_ind_compute(scans1, scans2, out_dir)
 
-%     addpath /hpc/packages/minerva-centos7/spm/spm12
+    addpath /hpc/packages/minerva-centos7/spm/spm12
     spm_jobman('initcfg');
     spm('defaults', 'FMRI');
     
